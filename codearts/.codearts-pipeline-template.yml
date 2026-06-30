@@ -1,0 +1,26 @@
+version: '1.0'
+stages:
+  - stage: Build
+    jobs:
+      - job: BuildImage
+        steps:
+          - task: CodeArtsBuild@1
+            inputs:
+              language: auto
+              dockerfile: ./Dockerfile
+              image_name: workshop/__APP_NAME__
+              image_tag: __BUILD_ID__
+              registry: swr.la-north-2.myhuaweicloud.com
+              namespace: workshop
+  - stage: Deploy
+    jobs:
+      - job: DeployToCCE
+        steps:
+          - task: CodeArtsDeploy@1
+            inputs:
+              cluster: demo-sat
+              namespace: dummystore
+              manifest: k8s/__APP_NAME__.yaml
+              image: swr.la-north-2.myhuaweicloud.com/workshop/__APP_NAME__:__BUILD_ID__
+              rolling_update: true
+              replicas: 2
