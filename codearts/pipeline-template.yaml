@@ -1,0 +1,36 @@
+# CodeArts Pipeline — Workshop DummyStore
+# Cada app tiene su pipeline independiente que compila, buildca y deploya a CCE
+
+trigger:
+  - push:   # Dispara en cada push a main
+      branches: [main]
+  - pull_request:  # Opcional: build en PR
+      branches: [main]
+
+stages:
+  - stage: Build
+    jobs:
+      - job: Compile
+        steps:
+          - checkout: self
+          - task: CodeArtsBuild@1
+            inputs:
+              language: auto  # Detecta lenguaje del Dockerfile
+              dockerfile: Dockerfile
+              image_name: $(app_name)
+              image_tag: $(Build.BuildId)
+              registry: swr.la-north-2.myhuaweicloud.com
+              namespace: workshop
+
+  - stage: Deploy
+    jobs:
+      - job: DeployToCCE
+        steps:
+          - task: CodeArtsDeploy@1
+            inputs:
+              cluster: cce-workshop  # Antes: cce-workshop, ahora: demo-sat
+              namespace: dummystore
+              manifest: k8s/$(app_name).yaml
+              image: swr.la-north-2.myhuaweicloud.com/workshop/$(app_name):$(Build.BuildId)
+              rolling_update: true
+              replicas: 2

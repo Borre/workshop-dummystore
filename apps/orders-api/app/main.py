@@ -41,7 +41,7 @@ class OrderCreate(BaseModel):
     product_id: int
     quantity: int
     customer: str
-    total: float
+    total: float = 0.0
 
 
 # ---------------------------------------------------------------------------

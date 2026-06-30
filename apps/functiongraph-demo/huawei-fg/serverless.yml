@@ -1,0 +1,23 @@
+# serverless.yml — FunctionGraph deployment config
+# Describe cómo APIG llama a FunctionGraph
+
+service: dummy-fg-file-processor
+
+provider:
+  name: huawei
+  region: la-north-2
+  runtime: Node.js 18.15
+  memorySize: 256
+  timeout: 30
+
+functions:
+  getDocument:
+    handler: index.handler
+    events:
+      - apigw:
+          path: /documents/{file}
+          method: GET
+          auth: none  # Para demo; en prod usar IAM o token
+    environment:
+      OBS_SERVER: https://obs.la-north-2.myhuaweicloud.com
+      OBS_BUCKET: documents

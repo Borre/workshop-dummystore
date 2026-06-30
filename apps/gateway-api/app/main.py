@@ -171,14 +171,14 @@ async def health() -> dict[str, Any]:
 async def list_products(request: Request) -> Response:
     """Proxy GET /api/products → catalog-api:8080/products"""
     _logger.info("proxy-catalog: list products")
-    return await _proxy("/products", "GET", SERVICES["catalog"], request)
+    return await _proxy("/api/products", "GET", SERVICES["catalog"], request)
 
 
 @app.get("/api/products/{product_id}")
 async def get_product(product_id: int, request: Request) -> Response:
     """Proxy GET /api/products/{id} → catalog-api:8080/products/{id}"""
     _logger.info("proxy-catalog: get product", extra={"product_id": product_id})
-    return await _proxy(f"/products/{product_id}", "GET", SERVICES["catalog"], request)
+    return await _proxy(f"/api/products/{product_id}", "GET", SERVICES["catalog"], request)
 
 
 @app.post("/api/orders")

@@ -1,0 +1,76 @@
+# CodeArts Project Configuration — DummyStore Workshop
+# Crear desde la consola HW Cloud → CodeArts → Crear Proyecto
+
+project:
+  name: workshop-dummystore
+  description: "Taller práctico de migración de aplicaciones a Huawei Cloud CCE"
+  source_type: git
+  visibility: private
+
+repositories:
+  - name: gateway-api
+    description: "API Gateway (Python FastAPI) — punto de entrada único"
+    default_branch: main
+    template: false
+
+  - name: catalog-api
+    description: "Catálogo de productos (Java 21 Spring Boot)"
+    default_branch: main
+    template: false
+
+  - name: orders-api
+    description: "Procesamiento de órdenes (Python FastAPI)"
+    default_branch: main
+    template: false
+
+  - name: web-ui
+    description: "Frontend Blazor (.NET 8)"
+    default_branch: main
+    template: false
+
+  - name: functiongraph-demo
+    description: "Ejemplos de migración Azure Function → FunctionGraph"
+    default_branch: main
+    template: false
+
+pipelines:
+  - name: gateway-api-pipeline
+    language: python
+    dockerfile: Dockerfile
+    app_name: gateway-api
+    port: 9000
+    trigger: push
+
+  - name: catalog-api-pipeline
+    language: java
+    dockerfile: Dockerfile
+    app_name: catalog-api
+    port: 8080
+    trigger: push
+
+  - name: orders-api-pipeline
+    language: python
+    dockerfile: Dockerfile
+    app_name: orders-api
+    port: 8000
+    trigger: push
+
+  - name: web-ui-pipeline
+    language: dotnet
+    dockerfile: Dockerfile
+    app_name: web-ui
+    port: 5000
+    trigger: push
+
+  - name: deploy-all
+    description: "Pipeline maestro que deploya las 4 apps al cluster"
+    type: combined
+    depends_on:
+      - gateway-api-pipeline
+      - catalog-api-pipeline
+      - orders-api-pipeline
+      - web-ui-pipeline
+    deploy:
+      cluster: demo-sat
+      namespace: dummystore
+      manifests: k8s/
