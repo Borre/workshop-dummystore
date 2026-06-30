@@ -19,3 +19,6 @@ target/
 *.swo
 *~
 Thumbs.db
+*.pyc
+.env
+*.log
