@@ -1,0 +1,83 @@
+@page "/orders"
+@using System.Net.Http
+@inject IHttpClientFactory HttpClientFactory
+@implements IDisposable
+
+<PageTitle>Orders - DummyStore Workshop</PageTitle>
+
+<h1>Orders</h1>
+
+@if (orders == null)
+{
+    <p>Loading...</p>
+}
+else if (error != null)
+{
+    <div class="alert alert-danger">@error</div>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Product ID</th>
+                <th>Quantity</th>
+                <th>Customer</th>
+                <th>Status</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var o in orders)
+            {
+                <tr>
+                    <td>@o.id</td>
+                    <td>@o.product_id</td>
+                    <td>@o.quantity</td>
+                    <td>@o.customer</td>
+                    <td>@o.status</td>
+                    <td>@o.total</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<p><a href="/">Back to Home</a></p>
+
+@code {
+    private List<Order>? orders;
+    private string? error;
+    private CancellationTokenSource? _cts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _cts = new CancellationTokenSource();
+        try
+        {
+            var client = HttpClientFactory.CreateClient("Gateway");
+            orders = await client.GetFromJsonAsync<List<Order>>("/api/orders", _cts.Token);
+        }
+        catch (Exception ex)
+        {
+            error = $"Failed to load orders: {ex.Message}";
+        }
+    }
+
+    public void Dispose()
+    {
+        _cts?.Cancel();
+        _cts?.Dispose();
+    }
+
+    public class Order
+    {
+        public int id { get; set; }
+        public int product_id { get; set; }
+        public int quantity { get; set; }
+        public string? customer { get; set; }
+        public string? status { get; set; }
+        public decimal total { get; set; }
+    }
+}

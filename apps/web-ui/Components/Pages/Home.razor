@@ -1,0 +1,17 @@
+@page "/"
+@using System.Net.Http
+@inject IHttpClientFactory HttpClientFactory
+
+<PageTitle>DummyStore Workshop</PageTitle>
+
+<h1>DummyStore Workshop</h1>
+
+<p>Welcome to the DummyStore Workshop management interface.</p>
+
+<div class="d-flex gap-3 mt-4">
+    <a href="/products" class="btn btn-primary btn-lg">Products</a>
+    <a href="/orders" class="btn btn-secondary btn-lg">Orders</a>
+</div>
+
+@code {
+}

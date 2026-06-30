@@ -1,0 +1,83 @@
+@page "/products"
+@using System.Net.Http
+@inject IHttpClientFactory HttpClientFactory
+@implements IDisposable
+
+<PageTitle>Products - DummyStore Workshop</PageTitle>
+
+<h1>Products</h1>
+
+@if (products == null)
+{
+    <p>Loading...</p>
+}
+else if (error != null)
+{
+    <div class="alert alert-danger">@error</div>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Category</th>
+                <th>Stock</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in products)
+            {
+                <tr>
+                    <td>@p.id</td>
+                    <td>@p.name</td>
+                    <td>@p.description</td>
+                    <td>@p.price</td>
+                    <td>@p.category</td>
+                    <td>@p.stock</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<p><a href="/">Back to Home</a></p>
+
+@code {
+    private List<Product>? products;
+    private string? error;
+    private CancellationTokenSource? _cts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _cts = new CancellationTokenSource();
+        try
+        {
+            var client = HttpClientFactory.CreateClient("Gateway");
+            products = await client.GetFromJsonAsync<List<Product>>("/api/products", _cts.Token);
+        }
+        catch (Exception ex)
+        {
+            error = $"Failed to load products: {ex.Message}";
+        }
+    }
+
+    public void Dispose()
+    {
+        _cts?.Cancel();
+        _cts?.Dispose();
+    }
+
+    public class Product
+    {
+        public int id { get; set; }
+        public string? name { get; set; }
+        public string? description { get; set; }
+        public decimal price { get; set; }
+        public string? category { get; set; }
+        public int stock { get; set; }
+    }
+}
